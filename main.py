@@ -30,10 +30,15 @@ def get_company_news(ticker: str,date_from: str,date_to: str):
 
 def format_news(companies: list,ticker: str):
     result = []
-    for headline in companies:
-        result.append({'id': headline.get('id', ''),
-                    'ticker':ticker,
-                    'summary':headline.get('summary','')})
+    all_headlines = set()
+    for company in companies:
+        headline = company.get('headline','').strip()
+        if headline and headline not in all_headlines:
+            all_headlines.add(headline)
+            result.append({'id': company.get('id', ''),
+                        'ticker': ticker,
+                        'headline': headline,
+                        'summary':company.get('summary','')})
     return result
 
 def clean_news_orchestrator(ticker: str,date_from: str,date_to: str):
