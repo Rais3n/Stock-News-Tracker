@@ -1,7 +1,7 @@
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
-from app.rag.chunker import create_chunks
-from app.rag.embeddings import create_embedding
+from rag.chunker import create_chunks
+from rag.embeddings import create_embedding
 import uuid
 
 
