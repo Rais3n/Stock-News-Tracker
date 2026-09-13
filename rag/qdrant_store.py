@@ -2,6 +2,7 @@ from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
 from rag.chunker import create_chunks
 from rag.embeddings import create_embedding
+from app.models import Article
 import uuid
 
 
@@ -13,7 +14,7 @@ class QdrantStore:
         )
 
         self.collection_name = "stock_news"
-        self.create_collection(self)
+        self.create_collection()
 
     def create_collection(self):
         if not self.client.collection_exists(self.collection_name):
@@ -25,27 +26,22 @@ class QdrantStore:
                 )
             )
 
-    def add_embeddings(self, json):
+    def add_embeddings(self, articles: list[Article]):
+        if not articles:
+            return
         points = []
-        text = json["summary"]
-        chunks = create_chunks(text)
-        embeddings = []
-        for chunk in chunks:
-            embedding = create_embedding(chunk)
-            embeddings.append(embedding)
-
-        for chunk, embedding in zip(chunks, embeddings):
-
+        texts = [article.embedding_text for article in articles]
+        embeddings = create_embedding(texts)
+        for article, vector in zip(articles, embeddings):
             point = PointStruct(
-                id=str(uuid.uuid4()),
-                vector=embedding.tolist(),
+                id=article.id,
+                vector=vector.tolist(),
                 payload={
-                    "text": chunk
+                    "ticker": article.ticker,
+                    "text": article.embedding_text
                 }
             )
-
             points.append(point)
-
         self.client.upsert(
             collection_name=self.collection_name,
             points=points
