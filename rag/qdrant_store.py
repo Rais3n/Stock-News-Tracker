@@ -3,6 +3,7 @@ from qdrant_client.models import Distance, VectorParams, PointStruct
 from rag.chunker import create_chunks
 from rag.embeddings import create_embedding
 from app.models import Article
+from qdrant_client.models import Record
 import uuid
 
 
@@ -46,4 +47,17 @@ class QdrantStore:
             collection_name=self.collection_name,
             points=points
         )
+
+    def get_by_ticker(self, ticker: list[str] | str, limit: int = 5) -> list[Record]:
+        tickers = [ticker] if isinstance(ticker, str) else ticker
+        params = {"must": [{"key": "ticker", "match": {"any": tickers}}]}
+        records, _ = self.client.scroll(
+            collection_name=self.collection_name,
+            scroll_filter=params,
+            limit=limit,
+            with_vectors=True,
+            with_payload=True
+        )
+        return records
+
 
