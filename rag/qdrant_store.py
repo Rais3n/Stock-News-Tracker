@@ -4,6 +4,7 @@ from rag.chunker import create_chunks
 from rag.embeddings import create_embedding
 from app.models import Article
 from qdrant_client.models import Record
+import numpy as np
 import uuid
 
 
@@ -59,5 +60,21 @@ class QdrantStore:
             with_payload=True
         )
         return records
-
-
+    
+    @staticmethod
+    def filter_by_threshold(records: list[Record],threshold: float = 0.6) -> list[dict]:
+        accepted_records: list[dict] = []
+        accepted_vectors: list[np.ndarray] = []
+        for record in records:
+            current_vector = np.array(record.vector, dtype=np.float32)
+            is_duplicate = False
+            for vector in accepted_vectors:
+                similarity = float(np.dot(current_vector,vector))
+                if similarity >= threshold:
+                    is_duplicate = True
+                    break
+            if not is_duplicate:
+                accepted_records.append(record.payload)
+                accepted_vectors.append(current_vector)
+        return accepted_records
+                
