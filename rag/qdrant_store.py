@@ -51,15 +51,18 @@ class QdrantStore:
 
     def get_by_ticker(self, ticker: list[str] | str, limit: int = 5) -> list[Record]:
         tickers = [ticker] if isinstance(ticker, str) else ticker
-        params = {"must": [{"key": "ticker", "match": {"any": tickers}}]}
-        records, _ = self.client.scroll(
-            collection_name=self.collection_name,
-            scroll_filter=params,
-            limit=limit,
-            with_vectors=True,
-            with_payload=True
-        )
-        return records
+        all_records: list[Record] = []
+        for t in tickers:
+            params = {"must": [{"key": "ticker", "match": {"value": t}}]}
+            records, _ = self.client.scroll(
+                collection_name=self.collection_name,
+                scroll_filter=params,
+                limit=limit,
+                with_vectors=True,
+                with_payload=True
+            )
+            all_records.extend(records)
+        return all_records
     
     @staticmethod
     def filter_by_threshold(records: list[Record],threshold: float = 0.6) -> list[dict]:
