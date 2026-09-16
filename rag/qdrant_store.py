@@ -5,7 +5,7 @@ from rag.embeddings import create_embedding
 from app.models import Article
 from qdrant_client.models import Record
 import numpy as np
-import uuid
+from collections import defaultdict
 
 
 class QdrantStore:
@@ -67,17 +67,18 @@ class QdrantStore:
     @staticmethod
     def filter_by_threshold(records: list[Record],threshold: float = 0.6) -> list[dict]:
         accepted_records: list[dict] = []
-        accepted_vectors: list[np.ndarray] = []
+        accepted_vectors: defaultdict[str,list[np.ndarray]] = defaultdict(list)
         for record in records:
             current_vector = np.array(record.vector, dtype=np.float32)
+            current_ticker = record.payload.get('ticker','') if record.payload else ''
             is_duplicate = False
-            for vector in accepted_vectors:
+            for vector in accepted_vectors[current_ticker]:
                 similarity = float(np.dot(current_vector,vector))
                 if similarity >= threshold:
                     is_duplicate = True
                     break
             if not is_duplicate:
                 accepted_records.append(record.payload)
-                accepted_vectors.append(current_vector)
+                accepted_vectors[current_ticker].append(current_vector)
         return accepted_records
                 
