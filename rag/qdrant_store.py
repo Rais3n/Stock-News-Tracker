@@ -28,18 +28,24 @@ class QdrantStore:
                 )
             )
 
-    def add_embeddings(self, articles: list[Article]):
+    def add_embeddings(self, articles: list[Article], dedup_threshold: float = 0.8):
         if not articles:
             return
         points = []
         texts = [article.embedding_text for article in articles]
         embeddings = create_embedding(texts)
+        accepted_vectors: defaultdict[str,list[np.ndarray]] = defaultdict(list)
         for article, vector in zip(articles, embeddings):
+            ticker = article.ticker
+            existing = accepted_vectors[ticker]
+            if existing and np.any(np.dot(np.vstack(existing),vector) >= dedup_threshold):
+                continue
+            accepted_vectors[ticker].append(vector)
             point = PointStruct(
                 id=article.id,
                 vector=vector.tolist(),
                 payload={
-                    "ticker": article.ticker,
+                    "ticker": ticker,
                     "text": article.embedding_text
                 }
             )
