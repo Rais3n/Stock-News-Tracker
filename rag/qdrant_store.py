@@ -1,11 +1,14 @@
+import numpy as np
+import uuid
+from collections import defaultdict
+
+
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
 from rag.chunker import create_chunks
 from rag.embeddings import create_embedding
 from app.models import Article
 from qdrant_client.models import Record
-import numpy as np
-from collections import defaultdict
 
 
 class QdrantStore:
@@ -18,6 +21,7 @@ class QdrantStore:
         self.collection_name = "stock_news"
         self.create_collection()
 
+
     def create_collection(self):
         if not self.client.collection_exists(self.collection_name):
             self.client.create_collection(
@@ -27,6 +31,7 @@ class QdrantStore:
                     distance=Distance.COSINE
                 )
             )
+
 
     def add_embeddings(self, articles: list[Article], dedup_threshold: float = 0.8):
         if not articles:
@@ -42,7 +47,7 @@ class QdrantStore:
                 continue
             accepted_vectors[ticker].append(vector)
             point = PointStruct(
-                id=article.id,
+                id=self.make_point_id(article.id,ticker),
                 vector=vector.tolist(),
                 payload={
                     "ticker": ticker,
@@ -54,6 +59,7 @@ class QdrantStore:
             collection_name=self.collection_name,
             points=points
         )
+
 
     def get_by_ticker(self, ticker: list[str] | str, limit: int = 5) -> list[Record]:
         tickers = [ticker] if isinstance(ticker, str) else ticker
@@ -69,6 +75,12 @@ class QdrantStore:
             )
             all_records.extend(records)
         return all_records
+
+
+    @staticmethod
+    def make_point_id(article_id: int, ticker: str) -> uuid.UUID:
+        return uuid.uuid5(uuid.NAMESPACE_URL,f"{ticker}:{article_id}")
+
     
     @staticmethod
     def filter_by_threshold(records: list[Record],threshold: float = 0.6) -> list[dict]:
@@ -87,4 +99,3 @@ class QdrantStore:
                 accepted_records.append(record.payload)
                 accepted_vectors[current_ticker].append(current_vector)
         return accepted_records
-                
