@@ -4,11 +4,10 @@ from collections import defaultdict
 
 
 from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams, PointStruct
+from qdrant_client.models import Distance, VectorParams, PointStruct, Record, PayloadSchemaType     
 from rag.chunker import create_chunks
 from rag.embeddings import create_embedding
 from app.models import Article
-from qdrant_client.models import Record
 
 
 class QdrantStore:
@@ -30,6 +29,11 @@ class QdrantStore:
                     size=1024,
                     distance=Distance.COSINE
                 )
+            )
+            self.client.create_payload_index(
+                collection_name=self.collection_name,
+                field_name="publish_timestamp",
+                field_schema=PayloadSchemaType.INTEGER,
             )
 
 
@@ -70,6 +74,10 @@ class QdrantStore:
             records, _ = self.client.scroll(
                 collection_name=self.collection_name,
                 scroll_filter=params,
+                order_by={
+                    "key": "publish_timestamp",
+                    "direction": "desc"
+                },
                 limit=limit,
                 with_vectors=True,
                 with_payload=True
