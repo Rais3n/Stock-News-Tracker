@@ -51,7 +51,8 @@ class QdrantStore:
                 vector=vector.tolist(),
                 payload={
                     "ticker": ticker,
-                    "text": article.embedding_text
+                    "text": article.embedding_text,
+                    "publish_timestamp": article.publish_timestamp
                 }
             )
             points.append(point)

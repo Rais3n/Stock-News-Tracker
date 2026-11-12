@@ -12,7 +12,8 @@ def format_news(companies: list[dict],ticker: str) -> list[Article]:
                 news = Article(id=company.get('id'),
                                ticker=ticker,
                                headline=headline,
-                               summary=(company.get("summary", "") or "").strip()
+                               summary=(company.get("summary", "") or "").strip(),
+                               publish_timestamp=company.get('datetime')
                                )
             except ValidationError:
                 continue

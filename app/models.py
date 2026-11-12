@@ -5,6 +5,7 @@ class Article(BaseModel):
     ticker: str = ""
     summary: str = ""
     headline: str = ""
+    publish_timestamp: int
     @property
     def embedding_text(self) -> str:
         h = self.headline.strip()
