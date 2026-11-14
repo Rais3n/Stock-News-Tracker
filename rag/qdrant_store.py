@@ -37,9 +37,9 @@ class QdrantStore:
             )
 
 
-    def add_embeddings(self, articles: list[Article], dedup_threshold: float = 0.8):
+    def add_embeddings(self, articles: list[Article], dedup_threshold: float = 0.8) -> int:
         if not articles:
-            return
+            return 0
         points = []
         texts = [article.embedding_text for article in articles]
         embeddings = create_embedding(texts)
@@ -64,6 +64,7 @@ class QdrantStore:
             collection_name=self.collection_name,
             points=points
         )
+        return len(points)
 
 
     def get_by_ticker(self, ticker: list[str] | str, limit: int = 5) -> list[Record]:
