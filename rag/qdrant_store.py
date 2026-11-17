@@ -4,7 +4,7 @@ from collections import defaultdict
 
 
 from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams, PointStruct, Record, PayloadSchemaType     
+from qdrant_client.models import Distance, VectorParams, PointStruct, Record, PayloadSchemaType, ScoredPoint
 from rag.chunker import create_chunks
 from rag.embeddings import create_embedding
 from app.models import Article
@@ -85,6 +85,22 @@ class QdrantStore:
             )
             all_records.extend(records)
         return all_records
+
+
+    # threshold=0.5 set by hand on a few queries: drops unrelated articles (~0.35),
+    # but cannot separate weak from strong matches (both ~0.50-0.57).
+    def articles_by_query(self, ticker: str, query: str, limit: int = 5, threshold: float = 0.5) -> list[ScoredPoint]:
+        embedded_query = create_embedding(query)
+        params = {"must": [{"key": "ticker", "match": {"value": ticker}}]}
+        response = self.client.query_points(
+            collection_name=self.collection_name,
+            query=embedded_query.tolist(),
+            query_filter=params,
+            limit=limit,
+            with_payload=True,
+            score_threshold=threshold
+        )
+        return response.points
 
 
     @staticmethod
