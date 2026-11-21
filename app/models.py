@@ -6,6 +6,8 @@ class Article(BaseModel):
     summary: str = ""
     headline: str = ""
     publish_timestamp: int
+    url: str
+    source: str = ""
     @property
     def embedding_text(self) -> str:
         h = self.headline.strip()

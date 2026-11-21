@@ -56,7 +56,9 @@ class QdrantStore:
                 payload={
                     "ticker": ticker,
                     "text": article.embedding_text,
-                    "publish_timestamp": article.publish_timestamp
+                    "publish_timestamp": article.publish_timestamp,
+                    "source": article.source,
+                    "url": article.url,
                 }
             )
             points.append(point)
