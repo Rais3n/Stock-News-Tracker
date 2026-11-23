@@ -6,7 +6,9 @@ from user_operations.auth import router
 
 
 load_dotenv()
-FINNHUB_API_KEY = load_api_key('FINNHUB_API_KEY')
+FINNHUB_API_KEY = load_api_key("FINNHUB_API_KEY")
+OPENROUTER_API_KEY = load_api_key("OPENROUTER_API_KEY")
+AI_MODEL = "nvidia/nemotron-3.5-super-vl:free"
 
 app = FastAPI()
 app.include_router(router)
