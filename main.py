@@ -1,9 +1,12 @@
+from dotenv import load_dotenv
 from fastapi import FastAPI
 
-from src.api_client import load_finnhub_key
+from src.config import load_api_key
 from user_operations.auth import router
 
-FINNHUB_API_KEY = load_finnhub_key()
+
+load_dotenv()
+FINNHUB_API_KEY = load_api_key('FINNHUB_API_KEY')
 
 app = FastAPI()
 app.include_router(router)
