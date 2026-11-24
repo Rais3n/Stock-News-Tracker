@@ -55,6 +55,7 @@ class QdrantStore:
                 vector=vector.tolist(),
                 payload={
                     "ticker": ticker,
+                    "headline": article.headline,
                     "text": article.embedding_text,
                     "publish_timestamp": article.publish_timestamp,
                     "source": article.source,
