@@ -10,6 +10,7 @@ def ask_llm(messages: list[dict], model: str, api_key: str) -> str:
         "model": model,
         "messages": messages,
         "max_tokens": 1000,
+        "reasoning": {"max_tokens": 200},
     }
     try:
         response = requests.post(
