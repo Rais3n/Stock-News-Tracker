@@ -1,14 +1,5 @@
-import os 
 import requests
-from dotenv import load_dotenv
 
-
-def load_finnhub_key() -> str:
-    load_dotenv()
-    api_key = os.getenv("FINNHUB_API_KEY")
-    if not api_key:
-        raise RuntimeError("FINNHUB_API_KEY is missing or empty in .env")
-    return api_key
 
 def get_company_news(ticker: str,date_from: str,date_to: str, api_key: str) -> list[dict]:
     params = {"symbol": ticker,
